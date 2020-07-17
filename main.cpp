@@ -9,7 +9,7 @@
 #include <boost/algorithm/hex.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/circular_buffer.hpp> //Test
+#include <boost/algorithm/hex.hpp>
 
 //Через коммандную строку указывать имя1 имя2 ... размер блока S хэш ф-цию H
 //Программа должна выводить полные пути до идентичных файлов, 1 файл на одной строке
@@ -22,6 +22,25 @@
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+
+using boost::uuids::detail::md5;
+using boost::uuids::detail::sha1;
+
+std::string toString(const md5::digest_type &digest)
+{
+    const auto charDigest = reinterpret_cast<const char *>(&digest);
+    std::string result;
+    boost::algorithm::hex(charDigest, charDigest + sizeof(md5::digest_type), std::back_inserter(result));
+    return result;
+}
+
+std::string toString(const sha1::digest_type &digest)
+{
+    const auto charDigest = reinterpret_cast<const char *>(&digest);
+    std::string result;
+    boost::algorithm::hex(charDigest, charDigest + sizeof(sha1::digest_type), std::back_inserter(result));
+    return result;
+}
 
 int main(int argc, char *argv[])
 {   
@@ -69,19 +88,55 @@ int main(int argc, char *argv[])
         std::cout << fs::absolute(m_i) << '\n'; // Вывод абсолютного пути
         std::cout << fs::canonical(m_i) << '\n'; // Убирает точки в отличае от абсолютного, так что лучше его использовать
 
+        std::cout << "Is directory:" << fs::is_directory(m_i) << '\n';
+        std::cout << "Is regular file:" << fs::is_regular_file(m_i) << '\n';
+
+        if(fs::is_directory(m_i))
+        {
+            fs::recursive_directory_iterator di{m_i};
+            while(di != fs::recursive_directory_iterator{})
+            {
+                std::cout << *di++ << '\n';
+            }
+        }
+
         std::ifstream file;
 
         file.rdbuf()->pubsetbuf(nullptr, 0);
         file.open(input_vector.at(0));
 
-        // char buffer[1000];
-        // file.read(buffer, 8);
-        // for(int i = 0; i < 8; ++i)
-        //     std::cout << buffer[i];
-        // std::cout << '\n';
+        char buffer[1000];
+        file.read(buffer, 8);
+        for(int i = 0; i < 8; ++i)
+            std::cout << buffer[i];
+        std::cout << '\n';
 
-        std::vector<char> v;
-        boost::circular_buffer<char> cb{12}; // TODO: Доразобраться
+        /*Проверка работы хэш-функций*/
+        boost::uuids::detail::md5 md5;
+        boost::uuids::detail::md5::digest_type gt_md5;
+
+        boost::uuids::detail::sha1 sha1;
+        boost::uuids::detail::sha1::digest_type gt_sha1;
+
+        sha1.process_bytes(buffer, 8);
+        sha1.get_digest(gt_sha1);
+
+        md5.process_bytes(buffer, 8);
+        md5.get_digest(gt_md5);
+
+        std::cout << "Md5  Hash:" << toString(gt_md5 ) << '\n';
+        std::cout << "Sha1 Hash:" << toString(gt_sha1) << '\n';
+
+        boost::crc_16_type crc16;
+        crc16.process_bytes(buffer, 8);
+
+        boost::crc_32_type crc32;
+        crc32.process_bytes(buffer, 8);
+
+        std::cout << "CRC16 Hash:" << std::hex << std::uppercase << crc16.checksum() << '\n';
+        std::cout << "CRC32 Hash:" << std::hex << std::uppercase << crc32.checksum() << '\n';
+
+        /*Проверка работы хэш-функций*/
         file.close();
     } 
     catch (const std::exception &e) {
