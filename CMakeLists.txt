@@ -12,7 +12,7 @@ find_package(Boost COMPONENTS program_options filesystem REQUIRED)
 # message("Boost include dirs: ${BOOST_INCLUDE_DIRS}")
 # message("Boost libs: ${BOOST_LIBRARIES}")
 
-add_executable(boost main.cpp)
+add_executable(boost commandhandler.h commandhandler.cpp hash.h hash.cpp main.cpp)
 
 set_target_properties(boost PROPERTIES
     CXX_STANDARD 17
