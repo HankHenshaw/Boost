@@ -8,6 +8,8 @@
 #include <boost/filesystem.hpp>
 #include "hash.h"
 #include "commandhandler.h"
+#include <unordered_map> // TEST
+#include <algorithm> // TEST
 
 //Через коммандную строку указывать имя1 имя2 ... размер блока S хэш ф-цию H
 //Программа должна выводить полные пути до идентичных файлов, 1 файл на одной строке
@@ -24,45 +26,44 @@ namespace fs = boost::filesystem;
 int main(int argc, char *argv[])
 {   
     try {
-        po::options_description desc{"Options"};
-        desc.add_options()
-                ("help,h", "This screen")
-                ("size,S", po::value<size_t>()->default_value(5), "Block Size")
-                ("hash,H", po::value<std::string>()->default_value("md5"), "Hash Function, 1 of this [md5, crc16, crc32, sha1]")
-                ("input,i", po::value<std::vector<std::string>>(), "Input files, should be 2 or more files, or directory");
+        // po::options_description desc{"Options"};
+        // desc.add_options()
+        //         ("help,h", "This screen")
+        //         ("size,S", po::value<size_t>()->default_value(5), "Block Size")
+        //         ("hash,H", po::value<std::string>()->default_value("md5"), "Hash Function, 1 of this [md5, crc16, crc32, sha1]")
+        //         ("input,i", po::value<std::vector<std::string>>(), "Input files, should be 2 or more files, or directory");
 
-        po::variables_map vm;
-        store(parse_command_line(argc, argv, desc), vm);
-        notify(vm);
+        // po::variables_map vm;
+        // store(parse_command_line(argc, argv, desc), vm);
+        // notify(vm);
 
-        commandhandler handler(vm, desc);
-        handler.proccess();
+        // commandhandler handler(vm, desc);
+        // handler.proccess();
 
-        /*Вектор Для Входящих Файлов*/
-        /*
-        std::vector<std::string> input_vector;
-        input_vector = vm["input"].as<std::vector<std::string>>();
-        if(input_vector.size() < 1) //TODO 1 поменять 2
+        std::unordered_multimap<size_t, std::string> test_mm;
+
+        test_mm.insert(std::make_pair(1000, "Hello"));
+        test_mm.insert(std::make_pair(1000, "World"));
+        test_mm.insert(std::make_pair(900, "Weee"));
+
+        auto buck = test_mm.bucket(1000);
+        auto it = test_mm.begin(buck);
+        while(it != test_mm.end(buck))
         {
-            std::cout << desc << '\n'; //TODO: Поменять вывод на что-нибудь по лучше
-            std::cout << "Fail\n";
-            return -1;
+            std::cout << it.operator*().second << '\n';
+            ++it;
         }
-        else
-        {
-            for(auto i : input_vector)
-            {
-                std::cout << "File:" << i << '\n';
-            }
-        }
-        */
-        /*Вектор Для Входящих Файлов*/
 
-        //TODO: Проверка значения Н, что бы был один из реализованных хэшей
-        //TODO: Проверка значения S, что бы было больше 0 и меньше нашего установленного буффера
-        //TODO: Как вариант при не соответствии, ипользовать значения по умолчанию
-        //TODO: Проверка что файл существует
+        test_mm.erase(1000);
+        
+        for(auto i : test_mm)
+        {
+            std::cout << i.second << '\n';
+        }
         //TODO: Перед финальным коммитом изменить CMakeLists, чтобы boost нормльно искался на тревисе
+
+        //TODO: Сравнение файлов по размеру, и группирование по размеру
+        //Постепенное хэширование с отсеиванием неодинаковых файлов
 
         /*filesystem*/
         /*
