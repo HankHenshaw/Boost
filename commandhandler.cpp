@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "commandhandler.h"
 
 namespace fs = boost::filesystem;
 
-#define DEBUG //TODO: Remove
+//#define DEBUG //TODO: Remove
 
 commandhandler::commandhandler(po::variables_map &vm, po::options_description& desc)
         : m_vm(vm), m_desc(desc)
@@ -26,10 +27,12 @@ size_t commandhandler::filesCount()
             fs::recursive_directory_iterator rdi(path);
             while(rdi != fs::recursive_directory_iterator())
             {
+                m_vecOfFiles.emplace_back(boost::lexical_cast<std::string>(*rdi));
                 ++count;
                 ++rdi;
             }
         } else {
+            m_vecOfFiles.emplace_back(val);
             ++count;
         }
     }
@@ -104,4 +107,19 @@ bool commandhandler::proccess()
 #endif
 
     return true;
+}
+
+size_t commandhandler::getChunkSize()
+{
+    return m_chunk_size;
+}
+
+std::string commandhandler::getHashString()
+{
+    return m_hash;
+}
+
+const std::vector<std::string>& commandhandler::getVector()
+{
+    return m_vecOfFiles;
 }

@@ -5,22 +5,41 @@
 //TODO: Глянуть будет ли наложение стрингов, т.к. в алгоритме перевода в хекс, использутеся back_inserter 
 //TODO: Нужен ли toUpper для стрингов хэша?
 
+Crc16::Crc16()
+{
+
+}
+
 void Crc16::calcHash(size_t size)
 {
-    char buffer[2]; // TODO: Remove
+    char *buffer = new char[size];
 
     m_crc16.process_bytes(buffer, size);
     std::string bareStr = boost::lexical_cast<std::string>(m_crc16.checksum());
     boost::algorithm::hex(bareStr, std::back_inserter(m_hash));
+
+    delete[] buffer;
+}
+
+Crc32::Crc32()
+{
+    
 }
 
 void Crc32::calcHash(size_t size)
 {
-    char buffer[2]; // TODO: Remove
+    char *buffer = new char[size];
 
     m_crc32.process_bytes(buffer, size);
     std::string bareStr = boost::lexical_cast<std::string>(m_crc32.checksum());
     boost::algorithm::hex(bareStr, std::back_inserter(m_hash));
+
+    delete[] buffer;
+}
+
+Md5::Md5()
+{
+    
 }
 
 std::string Md5::toString(const boost::uuids::detail::md5::digest_type &digest)
@@ -34,11 +53,19 @@ std::string Md5::toString(const boost::uuids::detail::md5::digest_type &digest)
 
 void Md5::calcHash(size_t size)
 {
-    char buffer[2]; // TODO: Remove
+    char *buffer = new char[size];
+
     m_md5.process_bytes(buffer, size);
     m_md5.get_digest(m_gt_md5);
 
     m_hash = toString(m_gt_md5);
+
+    delete[] buffer;
+}
+
+Sha1::Sha1()
+{
+    
 }
 
 std::string Sha1::toString(const boost::uuids::detail::sha1::digest_type &digest)
@@ -52,10 +79,12 @@ std::string Sha1::toString(const boost::uuids::detail::sha1::digest_type &digest
 
 void Sha1::calcHash(size_t size)
 {
-    char buffer[2]; // TODO: Remove
+    char *buffer = new char[size];
+
     m_sha1.process_bytes(buffer, size);
     m_sha1.get_digest(m_gt_sha1);
 
     m_hash = toString(m_gt_sha1);
 
+    delete[] buffer;
 }
