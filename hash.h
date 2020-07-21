@@ -8,7 +8,7 @@
 
 class IHash {
 public:
-    virtual void calcHash(size_t size) = 0;
+    virtual void calcHash(char *buffer, size_t size) = 0;
     virtual const std::string& getHash() = 0;
     virtual ~IHash() = default;
 };
@@ -18,7 +18,7 @@ class Crc16 : public IHash {
     boost::crc_16_type m_crc16;
 public:
     Crc16();
-    virtual void calcHash(size_t size);
+    virtual void calcHash(char *buffer, size_t size);
     virtual const std::string& getHash()
     {
         return m_hash;
@@ -31,7 +31,7 @@ class Crc32 : public IHash {
     boost::crc_32_type m_crc32;
 public:
     Crc32();
-    virtual void calcHash(size_t size);
+    virtual void calcHash(char *buffer, size_t size);
     virtual const std::string& getHash()
     {
         return m_hash;
@@ -41,13 +41,12 @@ public:
 
 class Md5 : public IHash {
     std::string m_hash;
-    boost::uuids::detail::md5 m_md5;
     boost::uuids::detail::md5::digest_type m_gt_md5;
 
     std::string toString(const boost::uuids::detail::md5::digest_type &digest);
 public:
     Md5();
-    virtual void calcHash(size_t size);
+    virtual void calcHash(char *buffer, size_t size);
     virtual const std::string& getHash()
     {
         return m_hash;
@@ -57,13 +56,12 @@ public:
 
 class Sha1 : public IHash {
     std::string m_hash;
-    boost::uuids::detail::sha1 m_sha1;
     boost::uuids::detail::sha1::digest_type m_gt_sha1;
 
     std::string toString(const boost::uuids::detail::sha1::digest_type &digest);
 public:
     Sha1();
-    virtual void calcHash(size_t size);
+    virtual void calcHash(char *buffer, size_t size);
     virtual const std::string& getHash()
     {
         return m_hash;

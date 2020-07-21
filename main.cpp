@@ -10,6 +10,7 @@
 #include "commandhandler.h"
 #include <unordered_map> // TEST
 #include <algorithm> // TEST
+#include <boost/crc.hpp> // TEST
 #include "worker.h"
 
 //Через коммандную строку указывать имя1 имя2 ... размер блока S хэш ф-цию H
@@ -27,29 +28,68 @@ namespace fs = boost::filesystem;
 int main(int argc, char *argv[])
 {   
     try {
+        //Real Code
+//         po::options_description desc{"Options"};
+//         desc.add_options()
+//                 ("help,h", "This screen")
+//                 ("size,S", po::value<size_t>()->default_value(5), "Block Size")
+//                 ("hash,H", po::value<std::string>()->default_value("md5"), "Hash Function, 1 of this [md5, crc16, crc32, sha1]")
+//                 ("input,i", po::value<std::vector<std::string>>(), "Input files, should be 2 or more files, or directory");
 
-        po::options_description desc{"Options"};
-        desc.add_options()
-                ("help,h", "This screen")
-                ("size,S", po::value<size_t>()->default_value(5), "Block Size")
-                ("hash,H", po::value<std::string>()->default_value("md5"), "Hash Function, 1 of this [md5, crc16, crc32, sha1]")
-                ("input,i", po::value<std::vector<std::string>>(), "Input files, should be 2 or more files, or directory");
+//         po::variables_map vm;
+//         store(parse_command_line(argc, argv, desc), vm);
+//         notify(vm);
 
-        po::variables_map vm;
-        store(parse_command_line(argc, argv, desc), vm);
-        notify(vm);
+//         commandhandler handler(vm, desc);
+//         bool res = handler.proccess();
 
-        commandhandler handler(vm, desc);
-        bool res = handler.proccess();
+//         if(!res)
+//         {
+//             return 0;
+//         }
 
-        if(!res)
+
+
+//         worker w(handler.getHashString(), handler.getChunkSize(), handler.getVector());
+//         w.calculate();
+// //        w.printDuplicate();
+//         w.printHashes();
+        //Real Code
+
+        fs::ifstream file;
+        file.open("t1.txt");
+        if(!file.is_open())
         {
-            return 0;
-        }
+            std::cout << "Can't open\n";
+        } else {
+            char buf[5];
+            size_t block = 5;
+            fs::path p("t1.txt");
+            size_t size = fs::file_size(p);
+            size_t bytes = 0;
 
-        worker w(handler.getHashString(), handler.getChunkSize(), handler.getVector());
-        w.calculate();
-        w.printDuplicate();
+            while(bytes < size)
+            {
+                if(size - bytes < block)
+                {
+                    size_t rest = size-bytes;
+                    file.read(buf, size-bytes);
+                    bytes += rest;
+                    for(int i = rest-1; i < block; ++i)
+                    {
+                        buf[i] = 'X';
+                    }
+                } else {
+                    file.read(buf, block);
+                    bytes += block;
+                }
+
+                std::cout << buf << '\n';
+            }
+            
+            
+            file.close();
+        }
 
         /*Unordered MMap Test*/
         // std::unordered_multimap<size_t, std::string> test_mm;

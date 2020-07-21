@@ -23,6 +23,8 @@ worker::worker(std::string hashString, size_t bulk_size, const std::vector<std::
         fs::path path(val);
         m_mapOfPaths.insert(std::make_pair(fs::file_size(path), val));
     }
+
+    m_buffer = new char[m_bulk_size];
 }
 
 void worker::remDup()
@@ -47,10 +49,48 @@ void worker::calculate()
 {
     remDup(); // Убираем первичные дубликаты 
 
-    auto it = m_mapOfPaths.begin();
-    for(;it != m_mapOfPaths.end(); ++it)
-    {
+    fs::ifstream file;
 
+    file.rdbuf()->pubsetbuf(nullptr, 0);
+
+    auto it = m_mapOfPaths.begin();
+    for(;it != m_mapOfPaths.end(); ++it) // Цикл по мапу
+    {
+        //Cycle
+
+
+        auto bucket = m_mapOfPaths.bucket(it->first);
+        auto bucket_it = m_mapOfPaths.begin(bucket);
+        auto count = m_mapOfPaths.count(it->first);
+
+        for(;bucket_it != m_mapOfPaths.end(bucket); ++bucket_it) // Цикл по бакеты
+        {
+            //Еще 1 цикл, пока файл не закончится или у него не будет отличающийся хэш
+            file.open(bucket_it->second);
+            if(!file.is_open())
+            {
+                std::cout << "Failed To Open " << bucket_it->second << " file\n";
+                continue;
+                //TODO: Подумать что тут сделать, т.е. прерывать всю операцию или нет(т.е. просто убрать файл из списка)
+            } else {
+                for(size_t i = 0; i < m_bulk_size; ++i)
+                {
+                    m_buffer[i] = '\0';
+                }
+
+                file.read(m_buffer, m_bulk_size);
+
+                std::cout << "Cur Buffer:" << m_buffer << '\n';
+
+                //TODO: Вся жара тут
+                m_hash->calcHash(m_buffer, m_bulk_size);
+                m_mapOfHashes.emplace(std::make_pair(bucket_it->second, m_hash->getHash()));
+
+                file.close();
+            }
+        }
+
+        std::advance(it, count - 1);
     }
 }
 
@@ -66,4 +106,17 @@ void worker::printDuplicate()
         }
         //TODO: Печать разделить разные дубликаты н-р пустой строкой
     }
+}
+
+void worker::printHashes()
+{
+    for(const auto &val: m_mapOfHashes)
+    {
+        std::cout << "File Path:" << val.first << " | Hash:" << val.second << '\n';  
+    }
+}
+
+worker::~worker()
+{
+    delete[] m_buffer;
 }
