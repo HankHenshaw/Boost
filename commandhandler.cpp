@@ -27,7 +27,15 @@ size_t commandhandler::filesCount()
             fs::recursive_directory_iterator rdi(path);
             while(rdi != fs::recursive_directory_iterator())
             {
-                m_vecOfFiles.emplace_back(boost::lexical_cast<std::string>(*rdi));
+                std::string str = boost::lexical_cast<std::string>(*rdi);
+
+                auto it = str.end();
+                --it;
+                str.erase(it);
+                it = str.begin();
+                str.erase(it);
+                
+                m_vecOfFiles.emplace_back(str);
                 ++count;
                 ++rdi;
             }
