@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(bayan)
+if(NOT DEFINED ENV{TRAVIS_BUILD_NUMBER})
+    set(ENV{TRAVIS_BUILD_NUMBER} 1)
+endif()
+
+project(bayan VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 
 #set(BOOST_ROOT "/home/max/Загрузки/boost_1_73_0")
 #set(BOOST_INCLUDE_DIRS "/home/max/Загрузки/boost_1_73_0")
@@ -22,3 +26,15 @@ set_target_properties(boost PROPERTIES
 target_link_libraries(boost
     ${Boost_LIBRARIES}
 )
+
+install(TARGETS boost RUNTIME DESTINATION bin)
+
+set(CPACK_GENERATOR DEB)
+
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+
+set(CPACK_PACKAGE_CONTACT HankHenshaw at github.com)
+
+include(CPack)
