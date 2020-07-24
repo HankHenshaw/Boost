@@ -2,11 +2,11 @@
 dist: xenial
 language: cpp
 compiler: clang
-addons:
-  apt:
-    packages:
-    - libboost-all-dev
-    - sudo apt-get update -qq
+before_install:
+  - sudo add-apt-repository ppa:mhier/libboost-latest -y
+  - sudo apt-get update -q
+install:
+  - sudo apt-get install libboost1.73 -y
 script:
 - cmake .
 - cmake --build .
