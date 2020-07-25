@@ -1,3 +1,5 @@
+Travis CI: [![Build Status](https://travis-ci.org/HankHenshaw/Boost.svg?branch=master)](https://travis-ci.org/HankHenshaw/Boost)
+
 # Boost
 
 Программа сравнивает файлы на дубликаты
